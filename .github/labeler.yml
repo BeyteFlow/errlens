@@ -1,0 +1,23 @@
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: ['README.md', 'docs/**/*']
+
+ci/cd:
+  - changed-files:
+    - any-glob-to-any-file: ['.github/**/*']
+
+core:
+  - changed-files:
+    - any-glob-to-any-file: ['lib/**/*']
+
+cli:
+  - changed-files:
+    - any-glob-to-any-file: ['bin/**/*']
+
+testing:
+  - changed-files:
+    - any-glob-to-any-file: ['test/**/*']
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file: ['package.json', 'package-lock.json']
