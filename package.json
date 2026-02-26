@@ -1,0 +1,29 @@
+{
+  "name": "errlens",
+  "version": "1.0.0",
+  "description": "A CLI tool that explains JavaScript/Node.js errors in plain English.",
+  "main": "./bin/index.js",
+  "author": "BeyteFlow (https://github.com/BeyteFlow)",
+  "license": "MIT",
+  "bin": {
+    "errlens": "./bin/index.js"
+  },
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BeyteFlow/errlens.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BeyteFlow/errlens/issues"
+  },
+  "homepage": "https://github.com/BeyteFlow/errlens#readme",
+  "dependencies": {
+    "boxen": "^5.1.2",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "fuse.js": "^7.0.0",
+    "ora": "^5.4.1"
+  }
+}

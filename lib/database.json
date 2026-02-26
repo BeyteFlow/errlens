@@ -1,0 +1,38 @@
+[
+  {
+    "name": "TypeError: Cannot read properties of undefined",
+    "match": "Cannot read properties of undefined",
+    "explanation": "You are trying to access a property (like .map, .length, or .id) on a variable that currently holds no value.",
+    "why": "The variable wasn't initialized, an API call hasn't finished yet, or a function returned nothing.",
+    "fixes": [
+      "Use optional chaining: user?.profile",
+      "Set a default value: const list = data || []",
+      "Check if the variable exists: if (data) { ... }"
+    ],
+    "example": "const name = user?.info?.name || 'Guest';"
+  },
+  {
+    "name": "ReferenceError: x is not defined",
+    "match": "is not defined",
+    "explanation": "You're trying to use a variable that hasn't been declared in the current scope.",
+    "why": "Possible typo in the variable name, or the variable is scoped inside another function/block.",
+    "fixes": [
+      "Check for typos in the variable name",
+      "Ensure the variable is declared with const, let, or var",
+      "Check if the variable is defined outside the current function"
+    ],
+    "example": "const myVar = 10;\nconsole.log(myVar); // Ensure name matches exactly"
+  },
+  {
+    "name": "TypeError: x is not a function",
+    "match": "is not a function",
+    "explanation": "You tried to call a variable as if it were a function, but it's a different data type (like a String or Object).",
+    "why": "Often happens when an import fails or when a callback isn't passed correctly.",
+    "fixes": [
+      "Verify the variable is actually a function with typeof",
+      "Check your imports/requires",
+      "Ensure you aren't overwriting the function name with a value"
+    ],
+    "example": "if (typeof callback === 'function') {\n  callback();\n}"
+  }
+]
