@@ -1,15 +1,32 @@
 # ErrLens 🔍  
 > **Translate cryptic JavaScript errors into human-readable solutions instantly.**
 
-<p align="left">
-  <img src="https://img.shields.io/npm/v/errlens?style=flat-square&color=007acc" alt="npm version">
-  <img src="https://img.shields.io/github/license/BeyteFlow/errlens?style=flat-square&color=42b883" alt="license">
-  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome">
+<p align="center">
+  <img src="assets/errlens.png" width="500">
+</p>
+</br>
+</br>
+
+<p align="center">
+  <img src="https://img.shields.io/github/stars/BeyteFlow/errlens?style=for-the-badge" alt="GitHub stars">
+  <img src="https://img.shields.io/github/forks/BeyteFlow/errlens?style=for-the-badge" alt="GitHub forks">
+  <img src="https://img.shields.io/github/issues/BeyteFlow/errlens?style=for-the-badge" alt="GitHub issues">
+  <img src="https://img.shields.io/github/license/BeyteFlow/errlens?style=for-the-badge" alt="GitHub license">
+  <img src="https://img.shields.io/github/actions/workflow/status/BeyteFlow/errlens/ci.yml?style=for-the-badge&label=Build" alt="Build status">
+  <img src="https://img.shields.io/github/issues-pr/BeyteFlow/errlens?style=for-the-badge" alt="Open PRs">
 </p>
 
 **ErrLens** is a professional-grade CLI utility designed to eliminate developer frustration. It intercepts Node.js crashes, analyzes stack traces, and delivers plain-English explanations with actionable fixes—directly in your terminal.
 
 ---
+</br>
+</br>
+</br>
+<p align="center">
+  <img src="assets/terminal.png" width="800">
+</p>
+</br>
+</br>
 
 ## 🌟 Key Features
 
