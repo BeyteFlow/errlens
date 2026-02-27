@@ -1,6 +1,6 @@
 {
   "name": "errlens",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A CLI tool that explains JavaScript/Node.js errors in plain English.",
   "main": "./bin/index.js",
   "author": "BeyteFlow (https://github.com/BeyteFlow)",
