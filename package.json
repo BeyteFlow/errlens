@@ -6,7 +6,7 @@
   "author": "BeyteFlow (https://github.com/BeyteFlow)",
   "license": "MIT",
   "bin": {
-    "errlens": "./bin/index.js"
+    "errlens": "bin/index.js"
   },
   "scripts": {
     "test": "node --test test/**/*.test.js"
