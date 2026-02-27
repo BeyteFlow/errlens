@@ -8,14 +8,20 @@
 </br>
 
 <p align="center">
+  <!-- GitHub Badges -->
   <img src="https://img.shields.io/github/stars/BeyteFlow/errlens?style=for-the-badge" alt="GitHub stars">
   <img src="https://img.shields.io/github/forks/BeyteFlow/errlens?style=for-the-badge" alt="GitHub forks">
   <img src="https://img.shields.io/github/issues/BeyteFlow/errlens?style=for-the-badge" alt="GitHub issues">
   <img src="https://img.shields.io/github/license/BeyteFlow/errlens?style=for-the-badge" alt="GitHub license">
-  <img src="https://img.shields.io/github/actions/workflow/status/BeyteFlow/errlens/ci.yml?style=for-the-badge&label=Build" alt="Build status">
   <img src="https://img.shields.io/github/issues-pr/BeyteFlow/errlens?style=for-the-badge" alt="Open PRs">
+  
+  <!-- npm Badges -->
+  <br>
+  <img src="https://img.shields.io/npm/v/errlens?style=for-the-badge" alt="npm version">
+  <img src="https://img.shields.io/npm/dm/errlens?style=for-the-badge" alt="npm downloads">
+  <img src="https://img.shields.io/npm/l/errlens?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/node/v/errlens?style=for-the-badge" alt="Node.js version">
 </p>
-
 **ErrLens** is a professional-grade CLI utility designed to eliminate developer frustration. It intercepts Node.js crashes, analyzes stack traces, and delivers plain-English explanations with actionable fixes—directly in your terminal.
 
 ---
