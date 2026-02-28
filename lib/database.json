@@ -2,37 +2,401 @@
   {
     "name": "TypeError: Cannot read properties of undefined",
     "match": "Cannot read properties of undefined",
-    "explanation": "You are trying to access a property (like .map, .length, or .id) on a variable that currently holds no value.",
-    "why": "The variable wasn't initialized, an API call hasn't finished yet, or a function returned nothing.",
-    "fixes": [
-      "Use optional chaining: user?.profile",
-      "Set a default value: const list = data || []",
-      "Check if the variable exists: if (data) { ... }"
-    ],
-    "example": "const name = user?.info?.name || 'Guest';"
+    "explanation": "You are trying to access a property on a variable that is currently empty.",
+    "why": "The variable wasn't initialized, or an API call hasn't finished yet.",
+    "fixes": ["Use optional chaining: user?.name", "Set a default value: data || []"],
+    "example": "const name = user?.name || 'Guest';"
   },
   {
     "name": "ReferenceError: x is not defined",
     "match": "is not defined",
-    "explanation": "You're trying to use a variable that hasn't been declared in the current scope.",
-    "why": "Possible typo in the variable name, or the variable is scoped inside another function/block.",
-    "fixes": [
-      "Check for typos in the variable name",
-      "Ensure the variable is declared with const, let, or var",
-      "Check if the variable is defined outside the current function"
-    ],
-    "example": "const myVar = 10;\nconsole.log(myVar); // Ensure name matches exactly"
+    "explanation": "You're using a variable that hasn't been declared.",
+    "why": "Typo in the name or the variable is scoped inside another function.",
+    "fixes": ["Check for typos", "Declare with const/let"],
+    "example": "const myVar = 10;\nconsole.log(myVar);"
   },
   {
     "name": "TypeError: x is not a function",
     "match": "is not a function",
-    "explanation": "You tried to call a variable as if it were a function, but it's a different data type (like a String or Object).",
-    "why": "Often happens when an import fails or when a callback isn't passed correctly.",
-    "fixes": [
-      "Verify the variable is actually a function with typeof",
-      "Check your imports/requires",
-      "Ensure you aren't overwriting the function name with a value"
-    ],
-    "example": "if (typeof callback === 'function') {\n  callback();\n}"
+    "explanation": "You called a variable as a function, but it's another type (String/Object).",
+    "why": "Import failed or a callback wasn't passed correctly.",
+    "fixes": ["Check imports", "Verify type with typeof"],
+    "example": "if (typeof fn === 'function') fn();"
+  },
+  {
+    "name": "Error: Cannot find module",
+    "match": "Cannot find module",
+    "explanation": "Node.js cannot find the file or package you are importing.",
+    "why": "The package isn't installed or the relative path is wrong.",
+    "fixes": ["Run 'npm install'", "Check file path spelling"],
+    "example": "require('./src/utils.js');"
+  },
+  {
+    "name": "Error: EADDRINUSE (Port Taken)",
+    "match": "EADDRINUSE",
+    "explanation": "The port your server wants is already being used.",
+    "why": "Another instance of your app is already running.",
+    "fixes": ["Kill the other process", "Change the port number"],
+    "example": "const PORT = process.env.PORT || 4000;"
+  },
+  {
+    "name": "RangeError: Maximum call stack size exceeded",
+    "match": "Maximum call stack size exceeded",
+    "explanation": "Your code is stuck in an infinite loop.",
+    "why": "A recursive function is calling itself without stopping.",
+    "fixes": ["Check recursion exit conditions", "Check while loops"],
+    "example": "function run() { if (done) return; run(); }"
+  },
+  {
+    "name": "Error: ECONNREFUSED",
+    "match": "ECONNREFUSED",
+    "explanation": "Your app tried to connect to a database/API but was rejected.",
+    "why": "The target server is down or the URL is wrong.",
+    "fixes": ["Ensure DB is running", "Check API URL"],
+    "example": "mongoose.connect('mongodb://localhost:27017/db');"
+  },
+  {
+    "name": "TypeError: Assignment to constant variable",
+    "match": "Assignment to constant variable",
+    "explanation": "You tried to change a 'const' variable.",
+    "why": "Const variables cannot be reassigned.",
+    "fixes": ["Use 'let' instead of 'const'"],
+    "example": "let count = 0; count = 1;"
+  },
+  {
+    "name": "Error: ENOENT (No such file)",
+    "match": "ENOENT",
+    "explanation": "You're trying to read a file that doesn't exist.",
+    "why": "File moved or path string is incorrect.",
+    "fixes": ["Verify file exists", "Use path.join()"],
+    "example": "fs.readFileSync(path.join(__dirname, 'log.txt'));"
+  },
+  {
+    "name": "SyntaxError: await is only valid in async functions",
+    "match": "await is only valid in async functions",
+    "explanation": "You used 'await' inside a normal function.",
+    "why": "Await requires the 'async' keyword on the parent function.",
+    "fixes": ["Add 'async' to function definition"],
+    "example": "async function start() { await call(); }"
+  },
+  {
+    "name": "Error [ERR_HTTP_HEADERS_SENT]",
+    "match": "ERR_HTTP_HEADERS_SENT",
+    "explanation": "You sent a response after already sending one.",
+    "why": "Multiple res.send() calls in one route.",
+    "fixes": ["Use 'return res.send()' to stop execution"],
+    "example": "if (err) return res.send(err); res.send(ok);"
+  },
+  {
+    "name": "MongooseError: Operation `x.findOne()` buffering timed out",
+    "match": "buffering timed out",
+    "explanation": "Mongoose couldn't connect to MongoDB in time.",
+    "why": "Database is offline or connection string is wrong.",
+    "fixes": ["Check MongoDB status", "Check connection string"],
+    "example": "mongoose.connect(process.env.MONGO_URI);"
+  },
+  {
+    "name": "JsonWebTokenError: jwt malformed",
+    "match": "jwt malformed",
+    "explanation": "The token provided is not a valid JWT structure.",
+    "why": "Token is corrupted or only part of it was sent.",
+    "fixes": ["Check 'Authorization' header", "Verify token generation"],
+    "example": "const token = req.headers.authorization.split(' ')[1];"
+  },
+  {
+    "name": "Error: secretOrPrivateKey must have a value",
+    "match": "secretOrPrivateKey must have a value",
+    "explanation": "JWT secret key is missing.",
+    "why": "Environment variable (JWT_SECRET) is not loaded.",
+    "fixes": ["Check .env file", "Run dotenv.config()"],
+    "example": "jwt.sign(p, process.env.JWT_SECRET);"
+  },
+  {
+    "name": "MongoServerError: E11000 duplicate key error",
+    "match": "E11000",
+    "explanation": "You're saving data with a 'unique' field that already exists.",
+    "why": "Usually a duplicate Email or Username in the DB.",
+    "fixes": ["Check if data exists before saving", "Use unique error handling"],
+    "example": "UserSchema.path('email').validate(...) "
+  },
+  {
+    "name": "SyntaxError: Unexpected token < in JSON",
+    "match": "Unexpected token < in JSON",
+    "explanation": "You tried to parse JSON, but got HTML instead.",
+    "why": "Your API returned an error page (HTML) instead of data (JSON).",
+    "fixes": ["Check the API URL", "Check server logs for crashes"],
+    "example": "fetch(url).then(res => res.json())"
+  },
+  {
+    "name": "Error: Cross-Origin Request Blocked (CORS)",
+    "match": "CORS",
+    "explanation": "Browser blocked your request for security reasons.",
+    "why": "The server doesn't allow requests from your frontend domain.",
+    "fixes": ["Install 'cors' package on server", "app.use(cors())"],
+    "example": "const cors = require('cors'); app.use(cors());"
+  },
+  {
+    "name": "TypeError: Cannot read property 'map' of undefined",
+    "match": "'map' of undefined",
+    "explanation": "You're trying to loop through an array that doesn't exist.",
+    "why": "The variable is null/undefined instead of an Array.",
+    "fixes": ["Initialize as empty array: data || []", "Check API response"],
+    "example": "items?.map(item => ...)"
+  },
+  {
+    "name": "Error: module not found 'dotenv'",
+    "match": "module not found 'dotenv'",
+    "explanation": "The 'dotenv' package is missing.",
+    "why": "You used it in code but didn't install it.",
+    "fixes": ["npm install dotenv"],
+    "example": "require('dotenv').config();"
+  },
+  {
+    "name": "ValidationError: User validation failed",
+    "match": "validation failed",
+    "explanation": "Data doesn't match your Mongoose schema.",
+    "why": "Missing required fields or wrong data types.",
+    "fixes": ["Check required fields", "Validate data on frontend"],
+    "example": "new User({ name: 'x' }).save();"
+  },
+  {
+    "name": "Error: Not authorized",
+    "match": "not authorized",
+    "explanation": "Access denied because of missing or invalid credentials.",
+    "why": "Token expired or wrong API key.",
+    "fixes": ["Login again", "Check headers"],
+    "example": "res.status(401).send('Unauthorized');"
+  },
+  {
+    "name": "Error: Request failed with status code 404",
+    "match": "status code 404",
+    "explanation": "The API endpoint you are calling doesn't exist.",
+    "why": "Wrong URL or the server route isn't defined.",
+    "fixes": ["Check API route spelling", "Check Base URL"],
+    "example": "axios.get('/api/users');"
+  },
+  {
+    "name": "Error: Request failed with status code 500",
+    "match": "status code 500",
+    "explanation": "The server crashed while processing your request.",
+    "why": "A bug on the backend server code.",
+    "fixes": ["Check server console logs", "Add try/catch on server"],
+    "example": "try { ... } catch (e) { res.status(500) }"
+  },
+  {
+    "name": "TypeError: object is not iterable",
+    "match": "is not iterable",
+    "explanation": "You used a for...of loop or spread (...) on a non-array.",
+    "why": "You tried to iterate over an Object or Null.",
+    "fixes": ["Ensure variable is an Array", "Use Object.keys()"],
+    "example": "[...myArray]"
+  },
+  {
+    "name": "ReferenceError: require is not defined",
+    "match": "require is not defined",
+    "explanation": "You're using 'require' in an ES Module.",
+    "why": "Node.js is set to 'type': 'module' in package.json.",
+    "fixes": ["Use 'import' instead", "Remove 'type: module'"],
+    "example": "import fs from 'fs';"
+  },
+  {
+    "name": "Error: Permission denied (EACCES)",
+    "match": "EACCES",
+    "explanation": "You don't have permission to access this file/port.",
+    "why": "You need admin rights or the file is locked.",
+    "fixes": ["Use 'sudo' (Linux/Mac)", "Check file permissions"],
+    "example": "chmod +x script.js"
+  },
+  {
+    "name": "SyntaxError: Identifier 'x' has already been declared",
+    "match": "has already been declared",
+    "explanation": "You declared the same variable name twice.",
+    "why": "Using 'let' or 'const' on a name that exists in the same scope.",
+    "fixes": ["Rename one of the variables", "Remove the second declaration"],
+    "example": "let x = 1; x = 2; // Don't use let again"
+  },
+  {
+    "name": "Error: PayloadTooLargeError",
+    "match": "PayloadTooLargeError",
+    "explanation": "The data you sent is too big for the server.",
+    "why": "Usually an image or file that exceeds the body-parser limit.",
+    "fixes": ["Increase limit: app.use(express.json({limit: '50mb'}))"],
+    "example": "app.use(express.limit('10mb'));"
+  },
+  {
+    "name": "TypeError: Cannot set property of null",
+    "match": "set property of null",
+    "explanation": "You're trying to give a value to a property of an empty variable.",
+    "why": "The object you're modifying hasn't been created yet.",
+    "fixes": ["Initialize the object first", "Check for null"],
+    "example": "const obj = {}; obj.prop = 1;"
+  },
+  {
+    "name": "Error: socket hang up",
+    "match": "socket hang up",
+    "explanation": "The server closed the connection unexpectedly.",
+    "why": "Server crashed or timeout occurred.",
+    "fixes": ["Check server health", "Increase timeout limit"],
+    "example": "axios.get(url, { timeout: 5000 });"
+  },
+  {
+    "name": "SyntaxError: Unexpected end of JSON input",
+    "match": "Unexpected end of JSON input",
+    "explanation": "The JSON data is incomplete or empty.",
+    "why": "The server sent an empty string instead of JSON.",
+    "fixes": ["Check API response body", "Handle empty responses"],
+    "example": "if (text) JSON.parse(text);"
+  },
+  {
+    "name": "Error: Script execution timed out",
+    "match": "Script execution timed out",
+    "explanation": "Your code took too long to run.",
+    "why": "Heavy computation or infinite loop.",
+    "fixes": ["Optimize logic", "Use worker threads"],
+    "example": "setTimeout(() => { ... }, 1000);"
+  },
+  {
+    "name": "TypeError: Cannot read property 'then' of undefined",
+    "match": "'then' of undefined",
+    "explanation": "You called .then() on something that isn't a Promise.",
+    "why": "The function didn't return a promise.",
+    "fixes": ["Make function 'async'", "Return a Promise"],
+    "example": "return new Promise(...) "
+  },
+  {
+    "name": "Error: Invalid connection string",
+    "match": "Invalid connection string",
+    "explanation": "The database URL format is wrong.",
+    "why": "Missing symbols like '@' or '/' in the URI.",
+    "fixes": ["Check DB URI format"],
+    "example": "mongodb+srv://user:pass@cluster..."
+  },
+  {
+    "name": "ReferenceError: window is not defined",
+    "match": "window is not defined",
+    "explanation": "You're trying to use browser code (window) in Node.js.",
+    "why": "Node.js doesn't have a 'window' object (that's for browsers).",
+    "fixes": ["Check if running in browser", "Use 'global' instead"],
+    "example": "if (typeof window !== 'undefined') { ... }"
+  },
+  {
+    "name": "Error: Too many listeners",
+    "match": "Too many listeners",
+    "explanation": "Memory leak detected in EventEmitters.",
+    "why": "Adding event listeners inside a loop or repeated function.",
+    "fixes": ["Use .once() instead of .on()", "Remove old listeners"],
+    "example": "emitter.setMaxListeners(20);"
+  },
+  {
+    "name": "TypeError: Cannot spread non-iterable object",
+    "match": "spread non-iterable",
+    "explanation": "You tried to use `...obj` where it's not allowed.",
+    "why": "Trying to spread an object into an array.",
+    "fixes": ["Use brackets [] for arrays and {} for objects"],
+    "example": "const newObj = { ...oldObj };"
+  },
+  {
+    "name": "Error: write EPIPE",
+    "match": "EPIPE",
+    "explanation": "Broken pipe: sending data to a closed connection.",
+    "why": "The other side (client/process) stopped listening.",
+    "fixes": ["Handle stream errors", "Check if process is alive"],
+    "example": "stream.on('error', (err) => { ... })"
+  },
+  {
+    "name": "SyntaxError: Missing initializer in const declaration",
+    "match": "Missing initializer",
+    "explanation": "You declared a const without giving it a value.",
+    "why": "Const must be set immediately when created.",
+    "fixes": ["Assign a value: const x = 1;"],
+    "example": "const x = 5;"
+  },
+  {
+    "name": "Error: npm ERR! peerinvalid",
+    "match": "peerinvalid",
+    "explanation": "Installed packages have conflicting versions.",
+    "why": "One library needs version A, another needs version B.",
+    "fixes": ["npm install --legacy-peer-deps"],
+    "example": "npm install package --force"
+  },
+  {
+    "name": "TypeError: data.filter is not a function",
+    "match": "filter is not a function",
+    "explanation": "You're trying to filter something that isn't an array.",
+    "why": "The variable is an Object or Null.",
+    "fixes": ["Ensure data is an Array: Array.isArray(data)"],
+    "example": "(data || []).filter(...)"
+  },
+  {
+    "name": "Error: Hostname not found (ENOTFOUND)",
+    "match": "ENOTFOUND",
+    "explanation": "DNS lookup failed for the URL.",
+    "why": "Typo in the URL or no internet connection.",
+    "fixes": ["Check URL spelling", "Check DNS/Internet"],
+    "example": "axios.get('https://api.example.com')"
+  },
+  {
+    "name": "SyntaxError: Unexpected reserved word",
+    "match": "reserved word",
+    "explanation": "You used a word saved for JS (like 'class' or 'await') as a variable name.",
+    "why": "You can't name a variable 'class' or 'function'.",
+    "fixes": ["Rename the variable"],
+    "example": "const myClass = 'math';"
+  },
+  {
+    "name": "Error: Cannot find name 'x'",
+    "match": "Cannot find name",
+    "explanation": "TypeScript cannot find this variable or type.",
+    "why": "Variable not declared or missing @types package.",
+    "fixes": ["Check imports", "Install types: npm install @types/node"],
+    "example": "import { x } from './file';"
+  },
+  {
+    "name": "TypeError: Cannot convert undefined or null to object",
+    "match": "convert undefined or null to object",
+    "explanation": "Calling Object methods on an empty variable.",
+    "why": "Using Object.keys(data) when data is null.",
+    "fixes": ["Check if data exists: data && Object.keys(data)"],
+    "example": "Object.entries(data || {})"
+  },
+  {
+    "name": "Error: No 'Access-Control-Allow-Origin' header",
+    "match": "Access-Control-Allow-Origin",
+    "explanation": "CORS error: Server isn't sharing data with your domain.",
+    "why": "Security policy on the backend.",
+    "fixes": ["Enable CORS on the server side"],
+    "example": "res.header('Access-Control-Allow-Origin', '*');"
+  },
+  {
+    "name": "SyntaxError: Invalid or unexpected token",
+    "match": "Invalid or unexpected token",
+    "explanation": "There is a character in your code that shouldn't be there.",
+    "why": "Copy-pasting hidden symbols or using smart quotes (” instead of \").",
+    "fixes": ["Retype the line manually", "Check for invisible symbols"],
+    "example": "const str = 'hello';"
+  },
+  {
+    "name": "Error: Timeout of 2000ms exceeded (Mocha/Jest)",
+    "match": "timeout of 2000ms exceeded",
+    "explanation": "Your test took too long to finish.",
+    "why": "Asynchronous code didn't call 'done()' or finish in time.",
+    "fixes": ["Increase test timeout", "Check for slow API calls"],
+    "example": "it('test', () => { ... }).timeout(5000);"
+  },
+  {
+    "name": "TypeError: Property 'x' does not exist on type 'y'",
+    "match": "does not exist on type",
+    "explanation": "TypeScript Error: Accessing a property that isn't in the Interface.",
+    "why": "The object structure doesn't match the TS Type definition.",
+    "fixes": ["Update the Interface", "Use type casting: (obj as any).prop"],
+    "example": "interface User { name: string }"
+  },
+  {
+    "name": "Error: npm ERR! 404 Not Found",
+    "match": "npm ERR! 404",
+    "explanation": "NPM can't find the package you want to install.",
+    "why": "Typo in the package name or it's a private package.",
+    "fixes": ["Check package spelling", "npm login"],
+    "example": "npm install express"
   }
 ]
