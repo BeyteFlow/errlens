@@ -21,7 +21,7 @@
   "homepage": "https://github.com/BeyteFlow/errlens#readme",
   "dependencies": {
     "boxen": "^5.1.2",
-    "chalk": "^4.1.2",
+    "chalk": "^5.6.2",
     "commander": "^11.1.0",
     "fuse.js": "^7.0.0",
     "ora": "^5.4.1"
