@@ -2,7 +2,6 @@
   "name": "errlens",
   "version": "1.0.3",
   "description": "Professional CLI tool that explains JavaScript and Node.js errors in plain English with actionable fixes directly in your terminal.",
-  "type": "module",
   "main": "./bin/index.js",
   "bin": {
     "errlens": "./bin/index.js"
@@ -25,7 +24,7 @@
     "error-handler"
   ],
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "files": [
     "bin/",
