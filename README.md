@@ -84,6 +84,39 @@ Get machine-readable results for your own tooling or automated reports:
 errlens "is not a function" --json
 ```
 
+Run a script and write the JSON report directly to a file in CI:
+
+```bash
+errlens run test.js --json > ci-report.json
+```
+
+In `--json` mode, ErrLens prints only JSON (no spinner, colors, or terminal boxes).
+
+Example response from `run`:
+
+```json
+{
+  "code": 1,
+  "count": 1,
+  "matches": []
+}
+```
+
+Example response from manual `analyze`:
+
+```json
+{
+  "code": 1,
+  "count": 1,
+  "matches": []
+}
+```
+
+Exit codes (useful for CI):
+
+- `run <file>` exits with the child process exit code.
+- `analyze <errorString>` exits with `1` when matches are found, otherwise `0`.
+
 ---
 
 ## 🧠 System Architecture

@@ -22,7 +22,8 @@ program
   .description("Run a Javascript file and analyze crashes")
   .action((file, options) => {
     const filePath = path.resolve(process.cwd(), file);
-    const spinner = ora(`Running ${chalk.yellow(file)}...`).start();
+    const isJson = Boolean(options.json || process.argv.includes("--json"));
+    const spinner = isJson ? null : ora(`Running ${chalk.yellow(file)}...`).start();
 
     const child = spawn(process.execPath, [filePath], { stdio: ["inherit", "pipe", "pipe"] });
 
@@ -30,38 +31,47 @@ program
 
     // Stream logs to terminal in real-time
     child.stdout.on("data", (data) => {
-      spinner.stop();
-      process.stdout.write(data);
-      spinner.start();
+      if (!isJson) {
+        spinner.stop();
+        process.stdout.write(data);
+        spinner.start();
+      }
     });
 
     // Capture stderr for analysis
     child.stderr.on("data", (data) => {
       errorOutput += data.toString();
+
+      if (!isJson) {
+        process.stderr.write(data);
+      }
     });
 
     child.on("close", (code, signal) => {
-      spinner.stop();
+      if (!isJson) {
+        spinner.stop();
+      }
+
+      const { count, matches } = findError(errorOutput);
 
       if (code === null) {
-        console.log(chalk.red.bold(`\n⚠️ Process killed by signal: ${signal}`));
+        if (isJson) {
+          const result = { code: 1, count, matches };
+          console.log(JSON.stringify(result, null, 2));
+        } else {
+          console.log(chalk.red.bold(`\n⚠️ Process killed by signal: ${signal}`));
+        }
         process.exit(1);
         return;
       }
 
-      if (code === 0) {
-        if (options.json) {
-          console.log(JSON.stringify({ code, count: 0, matches: [] }, null, 2));
-        } else {
+      if (isJson) {
+        const result = { code, count, matches };
+        console.log(JSON.stringify(result, null, 2));
+      } else if (code === 0) {
           console.log(chalk.green.bold("\n✨ Process finished successfully."));
-        }
       } else {
-        const { count, matches } = findError(errorOutput);
-
-        if (options.json) {
-          // JSON output only
-          console.log(JSON.stringify({ code, count, matches }, null, 2));
-        } else if (count > 0) {
+        if (count > 0) {
           console.log(chalk.bold.cyan(`\n🚀 ErrLens Analysis (${count} Issue(s)):`));
           matches.forEach(m => console.log(formatError(m))); // Pretty UI only here
         } else {
@@ -74,7 +84,12 @@ program
     });
 
     child.on("error", (err) => {
-      spinner.fail(chalk.red(`System Error: ${err.message}`));
+      if (isJson) {
+        const result = { code: 1, count: 0, matches: [] };
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        spinner.fail(chalk.red(`System Error: ${err.message}`));
+      }
       process.exit(1);
     });
   });
@@ -86,10 +101,12 @@ program
   .option('--json', 'Output result in JSON format')
   .action((errorString, options) => {
     const { count, matches } = findError(errorString);
+    const exitCode = count > 0 ? 1 : 0;
+    const isJson = Boolean(options.json || process.argv.includes("--json"));
 
-    if (options.json) {
-      console.log(JSON.stringify({ code: count > 0 ? 1 : 0, count, matches }, null, 2));
-      process.exit(count > 0 ? 1 : 0); // CI fails if issues found
+    if (isJson) {
+      console.log(JSON.stringify({ code: 1, count, matches }, null, 2));
+      process.exit(exitCode);
       return;
     }
 
