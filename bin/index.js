@@ -2,34 +2,40 @@
 
 const { Command } = require("commander");
 const { spawn } = require("child_process");
-const ora = require("ora").default; 
 const chalk = require("chalk");
 const path = require("path");
 const { findError } = require("../lib/matcher");
 const { formatError } = require("../lib/formatter");
+const { version } = require("../package.json");
 
 const program = new Command();
 
 program
   .name("errlens")
   .description("Professional JS Error Analytics")
-  .version("1.3.1");
+  .version(version)
+  .option("--json", "Output JSON instead of pretty UI"); // ✅ GLOBAL OPTION
 
 // ----------------- RUN COMMAND -----------------
 program
   .command("run <file>")
-  .option('--json', 'Output JSON instead of pretty UI')
   .description("Run a Javascript file and analyze crashes")
-  .action((file, options) => {
-    const filePath = path.resolve(process.cwd(), file);
-    const isJson = Boolean(options.json || process.argv.includes("--json"));
-    const spinner = isJson ? null : ora(`Running ${chalk.yellow(file)}...`).start();
+  .action(async (file) => {
+    const { default: ora } = await import("ora");
 
-    const child = spawn(process.execPath, [filePath], { stdio: ["inherit", "pipe", "pipe"] });
+    const isJson = Boolean(program.opts().json);
+    const filePath = path.resolve(process.cwd(), file);
+    const spinner = isJson
+      ? null
+      : ora(`Running ${chalk.yellow(file)}...`).start();
+
+    const child = spawn(process.execPath, [filePath], {
+      stdio: ["inherit", "pipe", "pipe"],
+    });
 
     let errorOutput = "";
 
-    // Stream logs to terminal in real-time
+    // Stream stdout only in pretty mode
     child.stdout.on("data", (data) => {
       if (!isJson) {
         spinner.stop();
@@ -38,7 +44,7 @@ program
       }
     });
 
-    // Capture stderr for analysis
+    // Capture stderr (DO NOT print in JSON mode)
     child.stderr.on("data", (data) => {
       errorOutput += data.toString();
 
@@ -48,34 +54,46 @@ program
     });
 
     child.on("close", (code, signal) => {
-      if (!isJson) {
+      if (!isJson && spinner) {
         spinner.stop();
       }
 
       const { count, matches } = findError(errorOutput);
 
+      // Process killed by signal
       if (code === null) {
+        const result = { code: 1, count, matches };
+
         if (isJson) {
-          const result = { code: 1, count, matches };
           console.log(JSON.stringify(result, null, 2));
         } else {
-          console.log(chalk.red.bold(`\n⚠️ Process killed by signal: ${signal}`));
+          console.log(
+            chalk.red.bold(`\n⚠️ Process killed by signal: ${signal}`)
+          );
         }
+
         process.exit(1);
-        return;
       }
 
+      // JSON MODE
       if (isJson) {
-        const result = { code, count, matches };
-        console.log(JSON.stringify(result, null, 2));
-      } else if (code === 0) {
-          console.log(chalk.green.bold("\n✨ Process finished successfully."));
+        console.log(JSON.stringify({ code, count, matches }, null, 2));
+        process.exit(code ?? 1);
+      }
+
+      // PRETTY MODE
+      if (code === 0) {
+        console.log(chalk.green.bold("\n✨ Process finished successfully."));
       } else {
         if (count > 0) {
-          console.log(chalk.bold.cyan(`\n🚀 ErrLens Analysis (${count} Issue(s)):`));
-          matches.forEach(m => console.log(formatError(m))); // Pretty UI only here
+          console.log(
+            chalk.bold.cyan(`\n🚀 ErrLens Analysis (${count} Issue(s)):`)
+          );
+          matches.forEach((m) => console.log(formatError(m)));
         } else {
-          console.log(chalk.red.bold("\n❌ Crash detected (No known fix in database):"));
+          console.log(
+            chalk.red.bold("\n❌ Crash detected (No known fix in database):")
+          );
           console.log(chalk.gray(errorOutput));
         }
       }
@@ -84,42 +102,48 @@ program
     });
 
     child.on("error", (err) => {
+      const result = { code: 1, count: 0, matches: [] };
+
       if (isJson) {
-        const result = { code: 1, count: 0, matches: [] };
         console.log(JSON.stringify(result, null, 2));
       } else {
-        spinner.fail(chalk.red(`System Error: ${err.message}`));
+        console.log(chalk.red(`System Error: ${err.message}`));
       }
+
       process.exit(1);
     });
   });
 
 // ----------------- ANALYZE COMMAND -----------------
 program
-  .arguments("<errorString>") // default command if no "run"
+  .command("analyze <errorString>")
   .description("Analyze a specific error string")
-  .option('--json', 'Output result in JSON format')
-  .action((errorString, options) => {
+  .action((errorString) => {
+    const isJson = Boolean(program.opts().json);
     const { count, matches } = findError(errorString);
     const exitCode = count > 0 ? 1 : 0;
-    const isJson = Boolean(options.json || process.argv.includes("--json"));
 
     if (isJson) {
-      console.log(JSON.stringify({ code: exitCode, count, matches }, null, 2));
+      console.log(
+        JSON.stringify({ code: exitCode, count, matches }, null, 2)
+      );
       process.exit(exitCode);
-      return;
     }
 
     if (count > 0) {
-      console.log(chalk.bold.cyan(`\n🚀 ErrLens Analysis (${count} Issue(s)):`));
-      matches.forEach(m => console.log(formatError(m))); // Pretty UI
+      console.log(
+        chalk.bold.cyan(`\n🚀 ErrLens Analysis (${count} Issue(s)):`)
+      );
+      matches.forEach((m) => console.log(formatError(m)));
     } else {
-      console.log(chalk.red.bold("\n❌ Crash detected (No known fix in database):"));
+      console.log(
+        chalk.red.bold("\n❌ Crash detected (No known fix in database):")
+      );
       console.log(chalk.gray(errorString));
     }
 
     process.exit(exitCode);
   });
 
-// ----------------- PARSE ARGUMENTS -----------------
+// ----------------- PARSE -----------------
 program.parse(process.argv);

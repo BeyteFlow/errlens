@@ -54,7 +54,31 @@ npm install -g errlens
 
 ---
 
+## ⚡ Quick Start
+
+```bash
+# Analyze an error message
+errlens analyze "TypeError: Cannot read property 'name' of undefined"
+
+# Run a script with error monitoring
+errlens run your-script.js
+
+# Get JSON output for CI/CD pipelines
+errlens analyze "is not a function" --json
+```
+
+---
+
 ## 🛠 Usage
+
+### Available Commands
+
+```bash
+errlens run <file> [--json]       # Run a script and analyze any crashes
+errlens analyze <error> [--json]  # Analyze a specific error message
+errlens --version                 # Show version information
+errlens --help                    # Show help
+```
 
 ### 1️⃣ Automatic Monitoring (The "Pro" Way)
 
@@ -71,7 +95,7 @@ errlens run your-app.js
 Found a weird error in your logs? Just paste the message:
 
 ```bash
-errlens "TypeError: Cannot read properties of undefined"
+errlens analyze "TypeError: Cannot read properties of undefined"
 ```
 
 ---
@@ -81,7 +105,7 @@ errlens "TypeError: Cannot read properties of undefined"
 Get machine-readable results for your own tooling or automated reports:
 
 ```bash
-errlens "is not a function" --json
+errlens analyze "is not a function" --json
 ```
 
 Run a script and write the JSON report directly to a file in CI:
