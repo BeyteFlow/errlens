@@ -2,7 +2,6 @@
 
 const { Command } = require("commander");
 const { spawn } = require("child_process");
-const chalk = require("chalk");
 const path = require("path");
 const { findError } = require("../lib/matcher");
 const { formatError } = require("../lib/formatter");
@@ -22,6 +21,7 @@ program
   .description("Run a Javascript file and analyze crashes")
   .action(async (file) => {
     const { default: ora } = await import("ora");
+    const { default: chalk } = await import("chalk");
 
     const isJson = Boolean(program.opts().json);
     const filePath = path.resolve(process.cwd(), file);
@@ -118,7 +118,8 @@ program
 program
   .command("analyze <errorString>")
   .description("Analyze a specific error string")
-  .action((errorString) => {
+  .action(async (errorString) => {
+    const { default: chalk } = await import("chalk");
     const isJson = Boolean(program.opts().json);
     const { count, matches } = findError(errorString);
     const exitCode = count > 0 ? 1 : 0;
