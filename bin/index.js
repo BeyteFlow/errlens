@@ -107,6 +107,7 @@ program
       if (isJson) {
         console.log(JSON.stringify(result, null, 2));
       } else {
+        if (spinner) spinner.stop();
         console.log(chalk.red(`System Error: ${err.message}`));
       }
 
