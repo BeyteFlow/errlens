@@ -1,4 +1,5 @@
 {
+  
   "name": "errlens",
   "version": "1.0.9",
   "description": "Professional CLI tool that explains JavaScript and Node.js errors in plain English with actionable fixes directly in your terminal.",
@@ -32,7 +33,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test test/**/*.test.js"
+    "test": "node --test test/**/*.test-lang.js"
+    
+
   },
   "repository": {
     "type": "git",
@@ -52,5 +55,8 @@
     "commander": "^14.0.3",
     "fuse.js": "^7.0.0",
     "ora": "^9.3.0"
+  },
+  "directories": {
+    "lib": "lib"
   }
 }

@@ -19,10 +19,12 @@ program
 program
   .command("run <file>")
   .description("Run a Javascript file and analyze crashes")
-  .action(async (file) => {
+  .option("--lang <code>", "output language (e.g. hi, es, fr)", "en")
+
+  .action(async (file,options) => {
     const { default: ora } = await import("ora");
     const { default: chalk } = await import("chalk");
-
+   
     const isJson = Boolean(program.opts().json);
     const filePath = path.resolve(process.cwd(), file);
     const spinner = isJson
@@ -58,7 +60,7 @@ program
         spinner.stop();
       }
 
-      const { count, matches } = findError(errorOutput);
+      const { count, matches } = findError(errorOutput,options.lang);
 
       // Process killed by signal
       if (code === null) {
@@ -119,10 +121,14 @@ program
 program
   .command("analyze <errorString>")
   .description("Analyze a specific error string")
-  .action(async (errorString) => {
+  .option("--lang <code>", "output language (e.g. hi, es, fr)", "en")
+  .argument("<error>", "error to explain")
+  
+
+  .action(async (errorString,options) => {
     const { default: chalk } = await import("chalk");
     const isJson = Boolean(program.opts().json);
-    const { count, matches } = findError(errorString);
+    const { count, matches } = findError(errorString,options.lang);
     const exitCode = count > 0 ? 1 : 0;
 
     if (isJson) {
@@ -143,9 +149,11 @@ program
       );
       console.log(chalk.gray(errorString));
     }
+    
 
     process.exit(exitCode);
   });
+  
 
 // ----------------- PARSE -----------------
 program.parse(process.argv);
