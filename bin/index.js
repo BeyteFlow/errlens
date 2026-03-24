@@ -123,8 +123,7 @@ program
   .description("Analyze a specific error string")
   .option("--lang <code>", "output language (e.g. hi, es, fr)", "en")
   .argument("<error>", "error to explain")
-  .action((error, options) => {
-    const result = findError(error, options.lang)})
+  
 
   .action(async (errorString,options) => {
     const { default: chalk } = await import("chalk");

@@ -25,4 +25,4 @@ fs.writeFileSync(
     'utf8'
 )
 
-console.log(` Extracted ${Object.keys(en).length} strings to local/en.json`)
+console.log(` Extracted ${Object.keys(en).length} strings to locales/en.json`)
