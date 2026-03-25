@@ -175,7 +175,6 @@ Exit codes (useful for CI):
 This follows Unix conventions where `0` means success and non-zero means failure. If you prefer success-on-detection in CI, invert the check in your pipeline logic (for example, treat exit code `1` from `analyze <errorString>` as a pass condition).
 
 ---
----
 
 ### 4️⃣ Multilingual Support
 
@@ -209,43 +208,6 @@ errlens run app.js --lang ja
 > 💡 **Tip:** Combine with `--json` for multilingual CI/CD pipeline output:
 > ```bash
 > errlens analyze "is not a function" --lang fr --json
----
----
-
-### 4️⃣ Multilingual Support
-
-ErrLens supports error explanations in multiple languages using the `--lang` flag.
-
-**Default behavior:** English (`en`) is used when `--lang` is not specified.
-```bash
-# Run a file and get explanation in Hindi
-errlens run app.js --lang hi
-
-# Analyze an error string in Spanish
-errlens analyze "Cannot read properties of undefined" --lang es
-
-# Run a file and get explanation in Japanese
-errlens run app.js --lang ja
-```
-
-#### 🌍 Supported Languages
-
-| Language   | Code |
-|------------|------|
-| English    | `en` |
-| Hindi      | `hi` |
-| Spanish    | `es` |
-| French     | `fr` |
-| German     | `de` |
-| Chinese    | `zh` |
-| Japanese   | `ja` |
-| Portuguese | `pt` |
-
-> 💡 **Tip:** Combine with `--json` for multilingual CI/CD pipeline output:
-> ```bash
-> errlens analyze "is not a function" --lang fr --json
-> ```
-
 ---
 
 ## 🧠 System Architecture
