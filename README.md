@@ -36,7 +36,7 @@
 
 ---
 
-### 🎬 Live Demo
+## 🎬 Live Demo
 
 **Automatic Error Monitoring (`errlens run test.js`):**
 
