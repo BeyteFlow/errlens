@@ -15,8 +15,8 @@ We welcome contributions from everyone—whether you're fixing bugs, improving d
 ### 2. Clone Your Fork
 
 ```bash
-git clone https://github.com/your-username/repository-name.git
-cd repository-name
+git clone https://github.com/BeyteFlow/errlens
+cd errlens
 ```
 
 ### 3. Set Up the Project
