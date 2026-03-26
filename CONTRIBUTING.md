@@ -21,14 +21,21 @@ cd errlens
 
 ### 3. Set Up the Project
 
-Follow the project-specific setup instructions (if applicable):
+**Prerequisites:** Node.js **v20.0.0 or higher** is required (see `engines` field in `package.json`). No Docker, database, or `.env` file is needed.
 
 ```bash
-# Example
+# Install dependencies using npm
 npm install
-# or
-pip install -r requirements.txt
+
+# Verify the CLI works locally
+node bin/index.js --version
+
+# Run the test suite
+npm test
+# which runs: node --test test/**/*.test-lang.js
 ```
+
+> **Note:** There is no dev server to start — ErrLens is a CLI tool. After `npm install`, use `node bin/index.js` in place of the `errlens` command to test your changes locally.
 
 ---
 
