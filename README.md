@@ -54,6 +54,8 @@
 - 🔄 **Live Monitoring** – Catch errors in real-time using the `errlens run` command.  
 - 🧠 **Fuzzy Logic Engine** – Matches messy stack traces and typos using `Fuse.js`.  
 - 🎨 **Beautiful UI** – High-visibility terminal output powered by `boxen` and `chalk`.  
+- 🎭 **Color Themes** – 5 built-in themes (`default`, `minimal`, `high-contrast`, `dracula`, `monokai`).  
+- 🔍 **Verbose Mode** – Extra diagnostic details with `--verbose` for debugging custom patterns.  
 - 🤖 **CI/CD Ready** – Export raw data via `--json` for automated error reporting.  
 
 ---
@@ -84,6 +86,12 @@ errlens analyze "Cannot read properties of undefined" --lang hi
 
 # Run a script with output in Spanish
 errlens run app.js --lang es
+
+# Use a color theme
+errlens analyze "is not a function" --theme dracula
+
+# Show verbose diagnostic info
+errlens analyze "Cannot read properties of undefined" --verbose
 ```
 
 ---
@@ -93,11 +101,20 @@ errlens run app.js --lang es
 ### Available Commands
 
 ```bash
-errlens run <file> [--json]       # Run a script and analyze any crashes
-errlens analyze <error> [--json]  # Analyze a specific error message
-errlens --version                 # Show version information
-errlens --help                    # Show help
+errlens run <file> [options]              # Run a script and analyze any crashes
+errlens analyze <error> [options]         # Analyze a specific error message
+errlens --version                         # Show version information
+errlens --help                            # Show help
 ```
+
+### Global Options
+
+| Flag | Description |
+|------|-------------|
+| `--json` | Output raw JSON (no colors, no boxes) — perfect for CI/CD pipelines |
+| `--theme <name>` | Pick a color theme (see [Color Themes](#-color-themes) below) |
+| `--verbose` | Show extra diagnostic info for each matched error |
+| `--lang <code>` | Output language (e.g. `hi`, `es`, `fr`) — available on `run` and `analyze` |
 
 ### 1️⃣ Automatic Monitoring (The "Pro" Way)
 
@@ -176,7 +193,61 @@ This follows Unix conventions where `0` means success and non-zero means failure
 
 ---
 
-### 4️⃣ Multilingual Support
+### 4️⃣ Color Themes
+
+ErrLens ships with several built-in color themes. Use the `--theme` flag to switch between them:
+
+```bash
+errlens analyze "TypeError: Cannot read properties of undefined" --theme dracula
+errlens run app.js --theme high-contrast
+errlens analyze "is not a function" --theme monokai
+```
+
+#### Available Themes
+
+| Theme | Description |
+|-------|-------------|
+| `default` | Cyan-bordered, colorful theme (the classic ErrLens look) |
+| `minimal` | Grayscale — clean, distraction-free output |
+| `high-contrast` | Bright colors on dark terminals for accessibility |
+| `dracula` | Magenta/pink palette inspired by the Dracula color scheme |
+| `monokai` | Yellow/green palette inspired by Monokai |
+
+> **Tip:** Combine `--theme` with `--verbose` for the most detailed output:
+> ```bash
+> errlens analyze "Cannot read properties of undefined" --theme dracula --verbose
+> ```
+
+When using `--json`, themes are ignored — you always get clean machine-readable output.
+
+#### Runtime Injection Themes
+
+When using `errlens/injector` or `errlens/auto` in your own code, set themes via environment variables:
+
+```bash
+ERRLENS_THEME=monokai ERRLENS_VERBOSE=1 node app.js
+```
+
+---
+
+### 5️⃣ Verbose Mode
+
+Add `--verbose` to see extra diagnostic details alongside each error match:
+
+```bash
+errlens analyze "Cannot read properties of undefined" --verbose
+```
+
+Verbose output adds:
+- **MATCH:** the exact substring that triggered the database lookup
+- **LENGTH:** character count of the match phrase
+- **KEY:** the internal database key used
+
+This is useful when debugging custom error patterns or contributing new entries to the database.
+
+---
+
+### 6️⃣ Multilingual Support
 
 ErrLens supports error explanations in multiple languages using the `--lang` flag.
 
@@ -230,7 +301,9 @@ errlens/
 ├── lib/
 │   ├── matcher.js     # Fuzzy search & Logic engine
 │   ├── formatter.js   # UI & Terminal styling
+│   ├── themes.js      # Color theme definitions & resolver
 │   ├── auto.js        # Automation & Error interception
+│   ├── injector.js    # Runtime injection with theme support
 │   └── database.json  # The "Knowledge Base" (Dictionary)
 ├── package.json       # Dependencies & Metadata
 └── README.md          # Documentation
