@@ -112,7 +112,7 @@ errlens --help                            # Show help
 | Flag | Description |
 |------|-------------|
 | `--json` | Output raw JSON (no colors, no boxes) — perfect for CI/CD pipelines |
-| `--theme <name>` | Pick a color theme (see [Color Themes](#-color-themes) below) |
+| `--theme <name>` | Pick a color theme (see the Color Themes section below) |
 | `--verbose` | Show extra diagnostic info for each matched error |
 | `--lang <code>` | Output language (e.g. `hi`, `es`, `fr`) — available on `run` and `analyze` |
 

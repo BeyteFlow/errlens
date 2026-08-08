@@ -7,7 +7,7 @@ const { spawn } = require("child_process");
 const path = require("path");
 const { findError } = require("../lib/matcher");
 const { formatError } = require("../lib/formatter");
-const { THEME_NAMES, isValidTheme } = require("../lib/themes");
+const { THEME_NAMES, isValidTheme, resolveTheme } = require("../lib/themes");
 const { version } = require("../package.json");
 
 const program = new Command();
@@ -88,8 +88,9 @@ program
         if (isJson) {
           console.log(JSON.stringify(result, null, 2));
         } else {
+          const theme = resolveTheme(themeName);
           console.log(
-            chalk.red.bold(`\n⚠️ Process killed by signal: ${signal}`)
+            chalk[theme.signalText].bold(`\n⚠️ Process killed by signal: ${signal}`)
           );
         }
 
@@ -101,12 +102,14 @@ program
         process.exit(code ?? 1);
       }
 
+      const theme = resolveTheme(themeName);
+
       if (code === 0) {
-        console.log(chalk.green.bold("\n✨ Process finished successfully."));
+        console.log(chalk[theme.successText].bold("\n✨ Process finished successfully."));
       } else {
         if (count > 0) {
           console.log(
-            chalk.bold.cyan(`\n🚀 ErrLens Analysis (${count} Issue(s)):`)
+            chalk[theme.headerText].bold(`\n🚀 ErrLens Analysis (${count} Issue(s)):`)
           );
           matches.forEach((m) =>
             console.log(
@@ -115,11 +118,11 @@ program
           );
         } else {
           console.log(
-            chalk.red.bold(
+            chalk[theme.unknownText].bold(
               "\n❌ Crash detected (No known fix in database):"
             )
           );
-          console.log(chalk.gray(errorOutput));
+          console.log(chalk[theme.rawText](errorOutput));
         }
       }
 
@@ -133,7 +136,8 @@ program
         console.log(JSON.stringify(result, null, 2));
       } else {
         if (spinner) spinner.stop();
-        console.log(chalk.red(`System Error: ${err.message}`));
+        const theme = resolveTheme(themeName);
+        console.log(chalk[theme.errorText](`System Error: ${err.message}`));
       }
 
       process.exit(1);
@@ -164,19 +168,21 @@ program
     }
 
     if (count > 0) {
+      const theme = resolveTheme(themeName);
       console.log(
-        chalk.bold.cyan(`\n🚀 ErrLens Analysis (${count} Issue(s)):`)
+        chalk[theme.headerText].bold(`\n🚀 ErrLens Analysis (${count} Issue(s)):`)
       );
       matches.forEach((m) =>
         console.log(formatError(m, { theme: themeName, verbose }))
       );
     } else {
+      const theme = resolveTheme(themeName);
       console.log(
-        chalk.red.bold(
+        chalk[theme.unknownText].bold(
           "\n❌ Crash detected (No known fix in database):"
         )
       );
-      console.log(chalk.gray(errorString));
+      console.log(chalk[theme.rawText](errorString));
     }
 
     process.exit(exitCode);
