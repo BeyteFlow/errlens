@@ -3,8 +3,9 @@
 "use strict";
 
 const { Command } = require("commander");
-const { spawn } = require("child_process");
+const { spawn, execSync } = require("child_process");
 const path = require("path");
+const fs = require("fs");
 const { findError } = require("../lib/matcher");
 const { formatError } = require("../lib/formatter");
 const { THEME_NAMES, isValidTheme, resolveTheme } = require("../lib/themes");
@@ -38,10 +39,38 @@ function sanitizeMatches(matches) {
   return matches.map(({ matchedText, ...rest }) => rest);
 }
 
+function isTsFile(filePath) {
+  return /\.m?ts$/.test(filePath);
+}
+
+function hasTsNode() {
+  try {
+    execSync("npx ts-node --version", { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function hasTsx() {
+  try {
+    execSync("npx tsx --version", { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function resolveTsRunner() {
+  if (hasTsx()) return "tsx";
+  if (hasTsNode()) return "ts-node";
+  return null;
+}
+
 // ----------------- RUN COMMAND -----------------
 program
   .command("run <file>")
-  .description("Run a Javascript file and analyze crashes")
+  .description("Run a Javascript/TypeScript file and analyze crashes")
   .option("--lang <code>", "output language (e.g. hi, es, fr)", "en")
   .action(async (file, options) => {
     const { default: ora } = await import("ora");
@@ -54,12 +83,40 @@ program
     validateTheme(themeName);
 
     const filePath = path.resolve(process.cwd(), file);
+
+    // Handle TypeScript files
+    if (isTsFile(filePath)) {
+      const runner = resolveTsRunner();
+      if (!runner) {
+        const theme = resolveTheme(themeName);
+        const msg = chalk[theme.unknownText].bold(
+          "\n❌ Cannot run TypeScript file: no runner found."
+        );
+        console.log(msg);
+        console.log(
+          chalk[theme.rawText](
+            "Install a TypeScript runner:\n" +
+              "  npm install -D tsx        (recommended, fast)\n" +
+              "  npm install -D ts-node    (alternative)\n\n" +
+              "Then retry: errlens run " + file
+          )
+        );
+        process.exit(1);
+      }
+    }
+
     const spinner = isJson
       ? null
       : ora(`Running ${chalk.yellow(file)}...`).start();
 
-    const child = spawn(process.execPath, [filePath], {
+    const isTs = isTsFile(filePath);
+    const runner = isTs ? resolveTsRunner() : null;
+    const execCmd = isTs ? "npx" : process.execPath;
+    const execArgs = isTs ? ["--no-install", runner, filePath] : [filePath];
+
+    const child = spawn(execCmd, execArgs, {
       stdio: ["inherit", "pipe", "pipe"],
+      shell: isTs && process.platform === "win32",
     });
 
     let errorOutput = "";
