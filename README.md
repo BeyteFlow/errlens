@@ -169,7 +169,8 @@ Example response from `run`:
 {
   "code": 0,
   "count": 0,
-  "matches": []
+  "matches": [],
+  "locations": []
 }
 ```
 
@@ -225,7 +226,7 @@ errlens analyze "TypeError: arr.join is not a function
    14  }
 ```
 
-Internal frames (`node:internal/...`, `file://`, `at <anonymous>`) are skipped when resolving the context snippet. Source snippets are only shown when the target file exists and is readable.
+Internal frames (`node:internal/...`, `at <anonymous>`) are skipped when choosing the context location. Source snippets are only read from regular files inside the current working directory: `file://` locations are decoded, but paths outside the project root, symlink escapes, non-regular files, and files over 256 KiB are rejected and no snippet is shown.
 
 Exit codes (useful for CI):
 

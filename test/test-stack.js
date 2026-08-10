@@ -2,6 +2,7 @@ const { parseStackTrace, parseFrame, sourceSnippet } = require('../lib/stack-par
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
+const { pathToFileURL } = require('url')
 
 let passed = 0
 let failed = 0
@@ -46,6 +47,13 @@ check('parses async frame', asyncFrames.length === 1)
 check('async frame function is processBatch', asyncFrames[0].function === 'processBatch')
 check('async frame line is 9', asyncFrames[0].line === 9)
 
+const parenPathStack = "    at Object.<anonymous> (C:\\Users\\Dell\\Work (copy)\\app.js:3:20)"
+const parenFrames = parseStackTrace(parenPathStack)
+check('parses frame with parens in path', parenFrames.length === 1)
+check('paren frame function is Object.<anonymous>', parenFrames[0].function === 'Object.<anonymous>')
+check('paren frame file ends with app.js', parenFrames[0].file.endsWith('Work (copy)\\app.js'))
+check('paren frame line is 3', parenFrames[0].line === 3)
+
 const urlStack = `Error: boom
     at file:///home/user/app/dist/main.js:3:7`
 const urlFrames = parseStackTrace(urlStack)
@@ -60,7 +68,7 @@ check('message-only input returns []', noStack.length === 0)
 
 check('parseFrame returns null for garbage', parseFrame('not a frame') === null)
 
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'errlens-stack-'))
+const tmpDir = fs.mkdtempSync(path.join(process.cwd(), '.errlens-stack-test-'))
 const tmpFile = path.join(tmpDir, 'sample.js')
 const tmpContent = [
   'const data = getData();',
@@ -70,6 +78,10 @@ const tmpContent = [
   'module.exports = { name };',
 ].join('\n')
 fs.writeFileSync(tmpFile, tmpContent, 'utf8')
+
+const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), 'errlens-outside-'))
+const outsideFile = path.join(outsideDir, 'secret.js')
+fs.writeFileSync(outsideFile, 'console.log("SECRET")', 'utf8')
 
 const snippet = sourceSnippet(tmpFile, 3, 2)
 check('snippet is created', snippet !== null)
@@ -91,7 +103,34 @@ check('missing file returns null', sourceSnippet(path.join(tmpDir, 'nope.js'), 1
 check('internal frame returns null', sourceSnippet('node:internal/modules/cjs/loader', 1, 2) === null)
 check('negative line returns null', sourceSnippet(tmpFile, 0, 2) === null)
 
+// Security: outside-root rejected
+check('outside-root path returns null', sourceSnippet(outsideFile, 1, 2) === null)
+check('outside-root file URL returns null', sourceSnippet(pathToFileURL(outsideFile).href, 1, 2) === null)
+
+// Security: non-regular file (directory) rejected
+check('non-regular file (dir) returns null', sourceSnippet(tmpDir, 1, 2) === null)
+
+// Security: symlink escape rejected
+let symlinkOk = false
+let symlinkEscapeRejected = false
+const linkPath = path.join(tmpDir, 'escape-link')
+try {
+  fs.symlinkSync(outsideDir, linkPath, 'junction')
+  symlinkOk = true
+  symlinkEscapeRejected = sourceSnippet(path.join(linkPath, 'secret.js'), 1, 2) === null
+} catch {
+  symlinkOk = false
+}
+check('symlink created', symlinkOk)
+check('symlink escape returns null', symlinkEscapeRejected)
+
+// Security: oversized file rejected
+const bigFile = path.join(tmpDir, 'big.js')
+fs.writeFileSync(bigFile, 'x'.repeat(512 * 1024), 'utf8')
+check('oversized file returns null', sourceSnippet(bigFile, 1, 2) === null)
+
 fs.rmSync(tmpDir, { recursive: true, force: true })
+fs.rmSync(outsideDir, { recursive: true, force: true })
 
 console.log(`\n--- Stack Parser ---`)
 console.log(`Passed: ${passed}`)
