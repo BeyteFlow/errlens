@@ -8,6 +8,7 @@ const path = require("path");
 const fs = require("fs");
 const { findError } = require("../lib/matcher");
 const { formatError } = require("../lib/formatter");
+const { parseStackTrace } = require("../lib/stack-parser");
 const { THEME_NAMES, isValidTheme, resolveTheme } = require("../lib/themes");
 const { version } = require("../package.json");
 
@@ -23,7 +24,8 @@ program
     `Color theme (${THEME_NAMES.join(", ")})`,
     "default"
   )
-  .option("--verbose", "Show extra diagnostic info for each match");
+  .option("--verbose", "Show extra diagnostic info for each match")
+  .option("--context", "Show source snippet for the error location");
 
 // ----------------- HELPERS -----------------
 function validateTheme(name) {
@@ -142,11 +144,13 @@ program
       }
 
       const { count, matches } = findError(errorOutput, options.lang);
+      const locations = parseStackTrace(errorOutput);
+      const context = Boolean(program.opts().context);
 
       if (code === null) {
         if (isJson) {
           console.log(
-            JSON.stringify({ code: 1, count, matches: sanitizeMatches(matches) }, null, 2)
+            JSON.stringify({ code: 1, count, matches: sanitizeMatches(matches), locations }, null, 2)
           );
         } else {
           const theme = resolveTheme(themeName);
@@ -160,7 +164,7 @@ program
 
       if (isJson) {
         console.log(
-          JSON.stringify({ code, count, matches: sanitizeMatches(matches) }, null, 2)
+          JSON.stringify({ code, count, matches: sanitizeMatches(matches), locations }, null, 2)
         );
         process.exit(code ?? 1);
       }
@@ -176,7 +180,7 @@ program
           );
           matches.forEach((m) =>
             console.log(
-              formatError(m, { theme: themeName, verbose })
+              formatError(m, { theme: themeName, verbose, locations, context })
             )
           );
         } else {
@@ -221,11 +225,13 @@ program
     validateTheme(themeName);
 
     const { count, matches } = findError(errorString, options.lang);
+    const locations = parseStackTrace(errorString);
+    const context = Boolean(program.opts().context);
     const exitCode = count > 0 ? 1 : 0;
 
     if (isJson) {
       console.log(
-        JSON.stringify({ code: exitCode, count, matches: sanitizeMatches(matches) }, null, 2)
+        JSON.stringify({ code: exitCode, count, matches: sanitizeMatches(matches), locations }, null, 2)
       );
       process.exit(exitCode);
     }
@@ -236,7 +242,7 @@ program
         chalk[theme.headerText].bold(`\n🚀 ErrLens Analysis (${count} Issue(s)):`)
       );
       matches.forEach((m) =>
-        console.log(formatError(m, { theme: themeName, verbose }))
+        console.log(formatError(m, { theme: themeName, verbose, locations, context }))
       );
     } else {
       const theme = resolveTheme(themeName);
