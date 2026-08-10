@@ -56,6 +56,7 @@
 - 🎨 **Beautiful UI** – High-visibility terminal output powered by `boxen` and `chalk`.  
 - 🎭 **Color Themes** – 5 built-in themes (`default`, `minimal`, `high-contrast`, `dracula`, `monokai`).  
 - 🔍 **Verbose Mode** – Extra diagnostic details with `--verbose` for debugging custom patterns.  
+- 📍 **Stack Trace Parsing** – Extract file/line/column from stack traces, with source snippets via `--context`.  
 - 🤖 **CI/CD Ready** – Export raw data via `--json` for automated error reporting.  
 
 ---
@@ -92,6 +93,15 @@ errlens analyze "is not a function" --theme dracula
 
 # Show verbose diagnostic info
 errlens analyze "Cannot read properties of undefined" --verbose
+
+# Show the source location and context from a stack trace
+errlens analyze "TypeError: arr is not a function
+  at handleData (src/index.ts:12:5)
+  at main (src/index.ts:20:3)" --context
+
+# Print stack-trace locations to JSON
+errlens analyze "TypeError: arr is not a function
+  at handleData (src/index.ts:12:5)" --json
 ```
 
 ---
@@ -114,6 +124,7 @@ errlens --help                            # Show help
 | `--json` | Output raw JSON (no colors, no boxes) — perfect for CI/CD pipelines |
 | `--theme <name>` | Pick a color theme (see the Color Themes section below) |
 | `--verbose` | Show extra diagnostic info for each matched error |
+| `--context` | Show a source snippet around the error location parsed from the stack trace |
 | `--lang <code>` | Output language (e.g. `hi`, `es`, `fr`) — available on `run` and `analyze` |
 
 ### 1️⃣ Automatic Monitoring (The "Pro" Way)
@@ -180,9 +191,41 @@ Example response from `analyze <errorString>` (match found):
       ],
       "example": "const name = user?.name || 'Guest';"
     }
+  ],
+  "locations": [
+    {
+      "function": "readFoo",
+      "file": "/home/user/app/src/index.js",
+      "line": 12,
+      "column": 5
+    }
   ]
 }
 ```
+
+`locations` is an array of stack frames parsed from the error. When no stack trace is present, it is an empty array.
+
+#### Stack Trace Context
+
+When the error string contains a Node-style stack trace, ErrLens extracts the frame details (function name, file, line, column) automatically. Use `--context` to print a 5-line snippet around the first application frame:
+
+```bash
+errlens analyze "TypeError: arr.join is not a function
+  at handleData (src/index.ts:12:5)
+  at main (src/index.ts:20:3)" --context
+```
+
+```text
+📍 LOCATION: handleData (src/index.ts:12:5)
+📍 CONTEXT: src/index.ts:12
+   10  const raw = fetchRows();
+   11  const rows = raw.map(normalize);
+   12 > const output = rows.join(',');
+   13  return output;
+   14  }
+```
+
+Internal frames (`node:internal/...`, `file://`, `at <anonymous>`) are skipped when resolving the context snippet. Source snippets are only shown when the target file exists and is readable.
 
 Exit codes (useful for CI):
 
