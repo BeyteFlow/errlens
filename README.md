@@ -107,7 +107,7 @@ errlens --version                         # Show version information
 errlens --help                            # Show help
 ```
 
-### Global Options
+### Options
 
 | Flag | Description |
 |------|-------------|

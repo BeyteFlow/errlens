@@ -24,7 +24,7 @@ program
   )
   .option("--verbose", "Show extra diagnostic info for each match");
 
-// ----------------- HELPER: validate theme -----------------
+// ----------------- HELPERS -----------------
 function validateTheme(name) {
   if (name && !isValidTheme(name)) {
     console.error(
@@ -32,6 +32,10 @@ function validateTheme(name) {
     );
     process.exit(1);
   }
+}
+
+function sanitizeMatches(matches) {
+  return matches.map(({ matchedText, ...rest }) => rest);
 }
 
 // ----------------- RUN COMMAND -----------------
@@ -83,10 +87,10 @@ program
       const { count, matches } = findError(errorOutput, options.lang);
 
       if (code === null) {
-        const result = { code: 1, count, matches };
-
         if (isJson) {
-          console.log(JSON.stringify(result, null, 2));
+          console.log(
+            JSON.stringify({ code: 1, count, matches: sanitizeMatches(matches) }, null, 2)
+          );
         } else {
           const theme = resolveTheme(themeName);
           console.log(
@@ -98,7 +102,9 @@ program
       }
 
       if (isJson) {
-        console.log(JSON.stringify({ code, count, matches }, null, 2));
+        console.log(
+          JSON.stringify({ code, count, matches: sanitizeMatches(matches) }, null, 2)
+        );
         process.exit(code ?? 1);
       }
 
@@ -130,10 +136,10 @@ program
     });
 
     child.on("error", (err) => {
-      const result = { code: 1, count: 0, matches: [] };
-
       if (isJson) {
-        console.log(JSON.stringify(result, null, 2));
+        console.log(
+          JSON.stringify({ code: 1, count: 0, matches: [] }, null, 2)
+        );
       } else {
         if (spinner) spinner.stop();
         const theme = resolveTheme(themeName);
@@ -162,7 +168,7 @@ program
 
     if (isJson) {
       console.log(
-        JSON.stringify({ code: exitCode, count, matches }, null, 2)
+        JSON.stringify({ code: exitCode, count, matches: sanitizeMatches(matches) }, null, 2)
       );
       process.exit(exitCode);
     }
@@ -189,4 +195,7 @@ program
   });
 
 // ----------------- PARSE -----------------
-program.parse(process.argv);
+program.parseAsync(process.argv).catch((err) => {
+  console.error(err.message || err);
+  process.exit(1);
+});
