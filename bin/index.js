@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
+"use strict";
+
 const { Command } = require("commander");
 const { spawn } = require("child_process");
 const path = require("path");
 const { findError } = require("../lib/matcher");
 const { formatError } = require("../lib/formatter");
+const { THEME_NAMES, isValidTheme, resolveTheme } = require("../lib/themes");
 const { version } = require("../package.json");
 
 const program = new Command();
@@ -13,19 +16,43 @@ program
   .name("errlens")
   .description("Professional JS Error Analytics")
   .version(version)
-  .option("--json", "Output JSON instead of pretty UI"); // ✅ GLOBAL OPTION
+  .option("--json", "Output JSON instead of pretty UI")
+  .option(
+    "--theme <name>",
+    `Color theme (${THEME_NAMES.join(", ")})`,
+    "default"
+  )
+  .option("--verbose", "Show extra diagnostic info for each match");
+
+// ----------------- HELPERS -----------------
+function validateTheme(name) {
+  if (name && !isValidTheme(name)) {
+    console.error(
+      `Unknown theme "${name}". Available: ${THEME_NAMES.join(", ")}`
+    );
+    process.exit(1);
+  }
+}
+
+function sanitizeMatches(matches) {
+  return matches.map(({ matchedText, ...rest }) => rest);
+}
 
 // ----------------- RUN COMMAND -----------------
 program
   .command("run <file>")
   .description("Run a Javascript file and analyze crashes")
   .option("--lang <code>", "output language (e.g. hi, es, fr)", "en")
-
-  .action(async (file,options) => {
+  .action(async (file, options) => {
     const { default: ora } = await import("ora");
     const { default: chalk } = await import("chalk");
-   
+
     const isJson = Boolean(program.opts().json);
+    const themeName = program.opts().theme;
+    const verbose = Boolean(program.opts().verbose);
+
+    validateTheme(themeName);
+
     const filePath = path.resolve(process.cwd(), file);
     const spinner = isJson
       ? null
@@ -37,7 +64,6 @@ program
 
     let errorOutput = "";
 
-    // Stream stdout only in pretty mode
     child.stdout.on("data", (data) => {
       if (!isJson) {
         spinner.stop();
@@ -46,10 +72,8 @@ program
       }
     });
 
-    // Capture stderr (DO NOT print in JSON mode)
     child.stderr.on("data", (data) => {
       errorOutput += data.toString();
-
       if (!isJson) {
         process.stderr.write(data);
       }
@@ -60,43 +84,51 @@ program
         spinner.stop();
       }
 
-      const { count, matches } = findError(errorOutput,options.lang);
+      const { count, matches } = findError(errorOutput, options.lang);
 
-      // Process killed by signal
       if (code === null) {
-        const result = { code: 1, count, matches };
-
         if (isJson) {
-          console.log(JSON.stringify(result, null, 2));
-        } else {
           console.log(
-            chalk.red.bold(`\n⚠️ Process killed by signal: ${signal}`)
+            JSON.stringify({ code: 1, count, matches: sanitizeMatches(matches) }, null, 2)
+          );
+        } else {
+          const theme = resolveTheme(themeName);
+          console.log(
+            chalk[theme.signalText].bold(`\n⚠️ Process killed by signal: ${signal}`)
           );
         }
 
         process.exit(1);
       }
 
-      // JSON MODE
       if (isJson) {
-        console.log(JSON.stringify({ code, count, matches }, null, 2));
+        console.log(
+          JSON.stringify({ code, count, matches: sanitizeMatches(matches) }, null, 2)
+        );
         process.exit(code ?? 1);
       }
 
-      // PRETTY MODE
+      const theme = resolveTheme(themeName);
+
       if (code === 0) {
-        console.log(chalk.green.bold("\n✨ Process finished successfully."));
+        console.log(chalk[theme.successText].bold("\n✨ Process finished successfully."));
       } else {
         if (count > 0) {
           console.log(
-            chalk.bold.cyan(`\n🚀 ErrLens Analysis (${count} Issue(s)):`)
+            chalk[theme.headerText].bold(`\n🚀 ErrLens Analysis (${count} Issue(s)):`)
           );
-          matches.forEach((m) => console.log(formatError(m)));
+          matches.forEach((m) =>
+            console.log(
+              formatError(m, { theme: themeName, verbose })
+            )
+          );
         } else {
           console.log(
-            chalk.red.bold("\n❌ Crash detected (No known fix in database):")
+            chalk[theme.unknownText].bold(
+              "\n❌ Crash detected (No known fix in database):"
+            )
           );
-          console.log(chalk.gray(errorOutput));
+          console.log(chalk[theme.rawText](errorOutput));
         }
       }
 
@@ -104,13 +136,14 @@ program
     });
 
     child.on("error", (err) => {
-      const result = { code: 1, count: 0, matches: [] };
-
       if (isJson) {
-        console.log(JSON.stringify(result, null, 2));
+        console.log(
+          JSON.stringify({ code: 1, count: 0, matches: [] }, null, 2)
+        );
       } else {
         if (spinner) spinner.stop();
-        console.log(chalk.red(`System Error: ${err.message}`));
+        const theme = resolveTheme(themeName);
+        console.log(chalk[theme.errorText](`System Error: ${err.message}`));
       }
 
       process.exit(1);
@@ -118,32 +151,51 @@ program
   });
 
 // ----------------- ANALYZE COMMAND -----------------
-  program
+program
   .command("analyze <errorString>")
   .description("Analyze a specific error string")
   .option("--lang <code>", "output language (e.g. hi, es, fr)", "en")
   .action(async (errorString, options) => {
     const { default: chalk } = await import("chalk");
     const isJson = Boolean(program.opts().json);
+    const themeName = program.opts().theme;
+    const verbose = Boolean(program.opts().verbose);
+
+    validateTheme(themeName);
+
     const { count, matches } = findError(errorString, options.lang);
     const exitCode = count > 0 ? 1 : 0;
 
     if (isJson) {
-      console.log(JSON.stringify({ code: exitCode, count, matches }, null, 2));
+      console.log(
+        JSON.stringify({ code: exitCode, count, matches: sanitizeMatches(matches) }, null, 2)
+      );
       process.exit(exitCode);
     }
 
     if (count > 0) {
-      console.log(chalk.bold.cyan(`\n🚀 ErrLens Analysis (${count} Issue(s)):`));
-      matches.forEach((m) => console.log(formatError(m)));
+      const theme = resolveTheme(themeName);
+      console.log(
+        chalk[theme.headerText].bold(`\n🚀 ErrLens Analysis (${count} Issue(s)):`)
+      );
+      matches.forEach((m) =>
+        console.log(formatError(m, { theme: themeName, verbose }))
+      );
     } else {
-      console.log(chalk.red.bold("\n❌ Crash detected (No known fix in database):"));
-      console.log(chalk.gray(errorString));
+      const theme = resolveTheme(themeName);
+      console.log(
+        chalk[theme.unknownText].bold(
+          "\n❌ Crash detected (No known fix in database):"
+        )
+      );
+      console.log(chalk[theme.rawText](errorString));
     }
 
     process.exit(exitCode);
   });
-  
 
 // ----------------- PARSE -----------------
-program.parse(process.argv);
+program.parseAsync(process.argv).catch((err) => {
+  console.error(err.message || err);
+  process.exit(1);
+});
