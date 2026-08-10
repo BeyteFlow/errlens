@@ -427,5 +427,165 @@
       "Check if you accidentally deleted a ')' while typing"
     ],
     "example": "console.log('Hello');"
+  },
+  {
+    "name": "TS2322: Type 'X' is not assignable to type 'Y'",
+    "match": "is not assignable to type",
+    "explanation": "TypeScript detected a type mismatch — you're assigning a value of one type to a variable expecting another.",
+    "why": "The value's type doesn't match the declared type annotation, return type, or parameter type.",
+    "fixes": ["Check the expected type annotation", "Use 'as' to cast: value as TargetType", "Widen the type: string | number"],
+    "example": "const x: string = 42; // TS2322"
+  },
+  {
+    "name": "TS2339: Property 'X' does not exist on type 'Y'",
+    "match": "does not exist on type",
+    "explanation": "You're accessing a property that the TypeScript type system doesn't know about.",
+    "why": "The property name is misspelled, or the object's type definition is missing the property.",
+    "fixes": ["Check spelling of the property name", "Extend the type/interface: interface Foo { bar: string }", "Use optional chaining: obj?.bar"],
+    "example": "interface User { name: string } user.age // TS2339"
+  },
+  {
+    "name": "TS2345: Argument of type 'X' is not assignable to parameter of type 'Y'",
+    "match": "is not assignable to parameter of type",
+    "explanation": "You're passing the wrong type of argument to a function.",
+    "why": "The argument type doesn't match the function's parameter type definition.",
+    "fixes": ["Check the function signature", "Cast the argument: arg as TargetType", "Update the function parameter type"],
+    "example": "function greet(name: string) {} greet(42); // TS2345"
+  },
+  {
+    "name": "TS2305: Module has no exported member 'X'",
+    "match": "has no exported member",
+    "explanation": "The module you're importing from doesn't export the name you specified.",
+    "why": "The export was removed, renamed, or never existed in that module.",
+    "fixes": ["Check the module's exports", "Use a default import instead", "Check for typos in the import name"],
+    "example": "import { foo } from './bar'; // if bar doesn't export foo"
+  },
+  {
+    "name": "TS2307: Cannot find module 'X'",
+    "match": "Cannot find module",
+    "explanation": "TypeScript can't locate the module you're trying to import.",
+    "why": "The module isn't installed, the path is wrong, or type declarations are missing.",
+    "fixes": ["Install the package: npm install <pkg>", "Install types: npm install -D @types/<pkg>", "Check import path spelling"],
+    "example": "import express from 'express';"
+  },
+  {
+    "name": "TS2531: Object is possibly 'null'",
+    "match": "Object is possibly 'null'",
+    "explanation": "You're trying to use a value that could be null.",
+    "why": "The variable might not have been assigned yet, or the function might return null.",
+    "fixes": ["Add a null check: if (obj !== null)", "Use optional chaining: obj?.prop", "Use the non-null assertion: obj!.prop (last resort)"],
+    "example": "const el = document.getElementById('x'); el.textContent; // TS2531"
+  },
+  {
+    "name": "TS2532: Object is possibly 'undefined'",
+    "match": "Object is possibly 'undefined'",
+    "explanation": "You're trying to use a value that could be undefined.",
+    "why": "The variable might not be initialized, or the function might return undefined.",
+    "fixes": ["Add a guard: if (val !== undefined)", "Use optional chaining: val?.prop", "Provide a default: val ?? defaultValue"],
+    "example": "function find(id: string) {} find('x').name; // TS2532"
+  },
+  {
+    "name": "TS7006: Parameter implicitly has an 'any' type",
+    "match": "implicitly has an 'any' type",
+    "explanation": "TypeScript inferred 'any' for a parameter because no type was provided.",
+    "why": "The 'noImplicitAny' compiler option is enabled and you didn't annotate the parameter.",
+    "fixes": ["Add a type annotation: function fn(x: string)", "Enable 'noImplicitAny' in tsconfig.json", "Use JSDoc: @param {string} x"],
+    "example": "function greet(name) {} // TS7006"
+  },
+  {
+    "name": "TS7030: Not all code paths return a value",
+    "match": "Not all code paths return a value",
+    "explanation": "A function has some code paths that don't return a value when one is expected.",
+    "why": "Missing return statements in some branches or at the end of the function.",
+    "fixes": ["Add explicit return statements in all branches", "Make the return type optional: string | undefined", "Add 'return undefined' at the end"],
+    "example": "function get(x: boolean): string { if (x) return 'a'; } // TS7030"
+  },
+  {
+    "name": "TS2367: This comparison appears to be unintentional",
+    "match": "This comparison appears to be unintentional",
+    "explanation": "TypeScript detected a comparison that's always true or always false due to type constraints.",
+    "why": "You're comparing two values whose types can never be equal.",
+    "fixes": ["Check if the comparison makes sense", "Review the types of both operands", "Cast one side if the comparison is intentional"],
+    "example": "const x: string = 'a'; if (x === 42) {} // TS2367"
+  },
+  {
+    "name": "TS2488: Type must have a 'Symbol.iterator' method",
+    "match": "must have a 'Symbol.iterator' method that returns an iterator",
+    "explanation": "You're trying to iterate over a value that isn't iterable.",
+    "why": "The type doesn't implement the Symbol.iterator protocol required for for...of loops or spread.",
+    "fixes": ["Ensure the type implements [Symbol.iterator]()", "Use Object.keys() for objects", "Wrap in an array: Array.from(value)"],
+    "example": "for (const x of 42) {} // TS2488"
+  },
+  {
+    "name": "TS2694: Namespace 'X' has no exported member 'Y'",
+    "match": "has no exported member",
+    "explanation": "You're referencing a member that doesn't exist in the namespace or module.",
+    "why": "The member was renamed, removed, or never exported.",
+    "fixes": ["Check the namespace/module exports", "Verify the member name", "Check if you need a different import"],
+    "example": "import { nonexistent } from './types'; // TS2694"
+  },
+  {
+    "name": "TS18003: No inputs were found in config file",
+    "match": "No inputs were found in config file",
+    "explanation": "The tsconfig.json has no 'include', 'exclude', or 'files' entries matching any files.",
+    "why": "The tsconfig.json file is empty or has incorrect glob patterns.",
+    "fixes": ["Add \"include\": [\"src/**/*\"] to tsconfig.json", "Check file extensions in include patterns", "Verify tsconfig.json location"],
+    "example": "{ \"include\": [\"src/**/*.ts\"] }"
+  },
+  {
+    "name": "TS1005: ',' expected",
+    "match": "TS1005: ',' expected",
+    "explanation": "TypeScript expected a comma separator but found something else.",
+    "why": "Missing comma in a type annotation, import statement, or generic parameter list.",
+    "fixes": ["Add the missing comma", "Check for typos in the surrounding code", "Verify bracket/angle-bracket nesting"],
+    "example": "type Pair = { a: string b: number }; // TS1005"
+  },
+  {
+    "name": "TS1003: Identifier expected",
+    "match": "TS1003: Identifier expected",
+    "explanation": "TypeScript expected a name (identifier) but found a keyword or symbol.",
+    "why": "Syntax error in type annotations, generic parameters, or declaration names.",
+    "fixes": ["Replace the keyword with a valid identifier", "Check for reserved words used as names", "Review the surrounding syntax"],
+    "example": "type 123abc = string; // TS1003"
+  },
+  {
+    "name": "TS1128: Declaration or statement expected",
+    "match": "TS1128: Declaration or statement expected",
+    "explanation": "TypeScript found code it doesn't expect at that position.",
+    "why": "Missing closing braces, extra tokens, or malformed syntax.",
+    "fixes": ["Check for missing closing braces }", "Remove unexpected tokens", "Verify function/class/if block structure"],
+    "example": "const x = 1 console.log(x); // TS1128"
+  },
+  {
+    "name": "TS1002: Unterminated string literal",
+    "match": "TS1002: Unterminated string literal",
+    "explanation": "A string literal was started but never closed.",
+    "why": "Missing closing quote (' or \") on a string.",
+    "fixes": ["Add the closing quote character", "Check for escaped quotes inside the string", "Verify the string spans multiple lines correctly"],
+    "example": "const msg = 'hello; // TS1002"
+  },
+  {
+    "name": "TS2554: Expected {0} arguments, but got {1}",
+    "match": "arguments, but got",
+    "explanation": "You're calling a function with the wrong number of arguments.",
+    "why": "The function signature requires a different number of parameters than provided.",
+    "fixes": ["Check the function's parameter list", "Add or remove arguments to match the signature", "Make optional parameters with ?"],
+    "example": "function add(a: number, b: number) {} add(1); // TS2554"
+  },
+  {
+    "name": "TS2769: No overload matches this call",
+    "match": "No overload matches this call",
+    "explanation": "You called a function with arguments that don't match any of its overloaded signatures.",
+    "why": "The argument types or count don't fit any available overload.",
+    "fixes": ["Check the function's overload signatures", "Adjust argument types to match an overload", "Use 'as' to cast arguments"],
+    "example": "function process(x: string): void; function process(x: number): void; process(true); // TS2769"
+  },
+  {
+    "name": "TS2309: Cannot find global type 'X'",
+    "match": "Cannot find global type",
+    "explanation": "TypeScript can't find a globally declared type.",
+    "why": "Missing @types package or global declaration file.",
+    "fixes": ["Install types: npm install -D @types/<pkg>", "Add a .d.ts declaration file", "Check tsconfig.json 'types' and 'typeRoots'"],
+    "example": "declare const myGlobal: MyType; // if MyType isn't defined"
   }
 ]
