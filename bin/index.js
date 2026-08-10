@@ -111,10 +111,12 @@ program
 
     const isTs = isTsFile(filePath);
     const runner = isTs ? resolveTsRunner() : null;
-    const execArgs = isTs ? [runner, filePath] : [filePath];
+    const execCmd = isTs ? "npx" : process.execPath;
+    const execArgs = isTs ? ["--no-install", runner, filePath] : [filePath];
 
-    const child = spawn(process.execPath, execArgs, {
+    const child = spawn(execCmd, execArgs, {
       stdio: ["inherit", "pipe", "pipe"],
+      shell: isTs && process.platform === "win32",
     });
 
     let errorOutput = "";

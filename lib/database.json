@@ -454,7 +454,7 @@
   },
   {
     "name": "TS2305: Module has no exported member 'X'",
-    "match": "has no exported member",
+    "match": "module '\"",
     "explanation": "The module you're importing from doesn't export the name you specified.",
     "why": "The export was removed, renamed, or never existed in that module.",
     "fixes": ["Check the module's exports", "Use a default import instead", "Check for typos in the import name"],
@@ -510,7 +510,7 @@
   },
   {
     "name": "TS2488: Type must have a 'Symbol.iterator' method",
-    "match": "must have a 'Symbol.iterator' method that returns an iterator",
+    "match": "'[Symbol.iterator]()' method that returns an iterator",
     "explanation": "You're trying to iterate over a value that isn't iterable.",
     "why": "The type doesn't implement the Symbol.iterator protocol required for for...of loops or spread.",
     "fixes": ["Ensure the type implements [Symbol.iterator]()", "Use Object.keys() for objects", "Wrap in an array: Array.from(value)"],
@@ -518,7 +518,7 @@
   },
   {
     "name": "TS2694: Namespace 'X' has no exported member 'Y'",
-    "match": "has no exported member",
+    "match": "namespace '",
     "explanation": "You're referencing a member that doesn't exist in the namespace or module.",
     "why": "The member was renamed, removed, or never exported.",
     "fixes": ["Check the namespace/module exports", "Verify the member name", "Check if you need a different import"],
@@ -581,7 +581,7 @@
     "example": "function process(x: string): void; function process(x: number): void; process(true); // TS2769"
   },
   {
-    "name": "TS2309: Cannot find global type 'X'",
+    "name": "TS2318: Cannot find global type 'X'",
     "match": "Cannot find global type",
     "explanation": "TypeScript can't find a globally declared type.",
     "why": "Missing @types package or global declaration file.",
